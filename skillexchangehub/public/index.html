@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Smart Skill Exchange Hub with Backend Integration</title>
+    <style>
+        /* Modern Clean Responsive Layout Blueprint Styling Elements */
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
+        body { background-color: #f4f6f9; color: #333; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        .container { background: #ffffff; width: 100%; max-width: 850px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); padding: 30px; display: none; }
+        .container.active { display: block; }
+        h2 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; margin-bottom: 20px; }
+        h3 { margin: 25px 0 10px 0; color: #34495e; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 14px; }
+        input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; background-color: #fafafa; }
+        .btn { display: inline-block; width: 100%; padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; text-align: center; }
+        .btn-primary { background-color: #3498db; color: #fff; }
+        .btn-success { background-color: #2ecc71; color: #fff; }
+        .btn-danger { background-color: #e74c3c; color: #fff; }
+link-text { color: #3498db; cursor: pointer; text-align: center; margin-top: 15px; text-decoration: underline; font-size: 14px; }
+        .profile-card { background: #f8f9fa; border-left: 4px solid #3498db; border-radius: 4px; padding: 15px; margin-bottom: 20px; }
+        .match-card { background: #fff; border: 1px solid #e0e0e0; border-radius: 6px; padding: 15px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+    </style>
+</head>
+<body>
+
+    <div id="page-login" class="container active">
+        <h2>Secure Gateway Login</h2>
+        <div class="form-group">
+            <label>Username</label>
+            <input type="text" id="login-username" placeholder="Enter registered account handle">
+        </div>
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="login-password" placeholder="Enter security password">
+        </div>
+        <button class="btn btn-primary" onclick="handleBackendLogin()">Authenticate Account</button>
+        <div class="link-text" onclick="navigateTo('page-register')">New to the Hub? Register Profile Here</div>
+    </div>
+
+    <div id="page-register" class="container">
+        <h2>Establish Peer Identity</h2>
+        <div class="form-group">
+            <label>Account Username</label>
+            <input type="text" id="reg-username" placeholder="Create a unique username">
+        </div>
+        <div class="form-group">
+            <label>Institutional Email</label>
+            <input type="email" id="reg-email" placeholder="Enter your email address">
+        </div>
+        <div class="form-group">
+            <label>Security Password</label>
+            <input type="password" id="reg-password" placeholder="Establish structural security token">
+        </div>
+        <div class="form-group">
+            <label>Expertise Category (To Teach)</label>
+            <input type="text" id="reg-teach" placeholder="Type skill you offer to teach">
+</div>
+        <div class="form-group">
+            <label>Target Competency (To Learn)</label>
+            <input type="text" id="reg-learn" placeholder="Type target skill requested">
+        </div>
+        <button class="btn btn-success" onclick="handleBackendRegister()">Commit Profile Registration</button>
+        <div class="link-text" onclick="navigateTo('page-login')">Existing profile verified? Return to Gateway</div>
+    </div>
+
+    <div id="page-dashboard" class="container">
+        <h2>Active Learner Dashboard</h2>
+        <div id="profile-summary" class="profile-card"></div>
+        
+        <h3>Compatible System Matches (Fetched from Live Server)</h3>
+        <div id="matches-list"></div>
+        
+        <button class="btn btn-danger" onclick="navigateTo('page-login')" style="margin-top: 20px;">Terminate Active Session</button>
+    </div>
+    <div id="page-classroom" class="container">
+        <div style="background-color: #34495e; color: #fff; padding: 8px 12px; display: flex; justify-content: space-between; font-size: 11px; font-family: sans-serif; border-top-left-radius: 4px; border-top-right-radius: 4px;">
+            <span>Smart Skill Exchange Hub - Learning Studio Workspace</span>
+            <span>URL: local://index.html#classroom</span>
+        </div>
+        
+        <div style="padding: 25px; border: 1px solid #dcdde1; background: #fff; border-bottom-left-radius: 4px; border-bottom-right-radius: 4px;">
+            <h2 style="color: #2c3e50; font-size: 20px; margin-bottom: 20px; border: none; padding: 0;">Live Skill Exchange Studio Workspace</h2>
+            
+            <div style="background-color: #f6ecf8; border-left: 4px solid #9b59b6; padding: 15px; margin-bottom: 20px;">
+                <p style="font-size: 13px; color: #2c3e50; margin-bottom: 5px;"><strong>Active Session Partner:</strong> <span id="partner-name">Emma</span></p>
+                <p style="font-size: 13px; color: #2c3e50;"><strong>Subject Topic Focus:</strong> Web Development Instruction Series</p>
+            </div>
+            
+            <video id="webcam-feed" autoplay playsinline style="background-color: #1e272e; width: 100%; height: 240px; border-radius: 4px; margin-bottom: 20px; object-fit: cover; transform: scaleX(-1);"></video>
+        
+            
+            <button class="btn btn-danger" style="width: auto; background-color: #7f8c8d;" onclick="navigateTo('page-dashboard')">Exit Studio Room</button>
+        </div>
+    </div>
+
+    <script>
+        let sessionUserToken = null;
+
+        function navigateTo(pageId) {
+            document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            if (pageId === 'page-dashboard') fetchServerMatches();
+        }
+
+        // Connects to the registration backend endpoint via HTTP POST request
+        async function handleBackendRegister() {
+            const dataPayload = {
+                username: document.getElementById('reg-username').value.trim(),
+                email: document.getElementById('reg-email').value.trim(),
+                password: document.getElementById('reg-password').value,
+                teach: document.getElementById('reg-teach').value.trim(),
+                learn: document.getElementById('reg-learn').value.trim()
+            };
+
+            const response = await fetch('/api/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+body: JSON.stringify(dataPayload)
+            });
+
+            const confirmation = await response.json();
+            alert(confirmation.message);
+            if (response.status === 201) navigateTo('page-login');
+        }
+
+        // Connects to the authentication validation backend database routing endpoint
+        async function handleBackendLogin() {
+            const dataPayload = {
+                username: document.getElementById('login-username').value.trim(),
+                password: document.getElementById('login-password').value
+            };
+
+            const response = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dataPayload)
+            });
+
+            const result = await response.json();
+            if (response.status === 200) {
+                sessionUserToken = result.user;
+                alert(result.message);
+                navigateTo('page-dashboard');
+            } else {
+                alert(result.message);
+            }
+        }
+
+        // Fetches matched profiles from the backend server
+        async function fetchServerMatches() {
+            document.getElementById('profile-summary').innerHTML = `
+                <div><strong>System Identity Handle:</strong> ${sessionUserToken.username}</div>
+                <div><strong>Offering Instruction In:</strong> ${sessionUserToken.teach}</div>
+                <div><strong>Acquisition Target:</strong> ${sessionUserToken.learn}</div>
+            `;
+
+            const response = await fetch(`/api/matches/${sessionUserToken.username}`);
+            const matchingProfiles = await response.json();
+            
+            const matchContainer = document.getElementById('matches-list');
+matchContainer.innerHTML = '';
+// Loop through the matched profiles from the server response
+    matchingProfiles.forEach(peer => {
+        const card = document.createElement('div');
+        card.style = "border: 1px solid #dcdde1; padding: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border-radius: 4px; background: #fff;";
+        
+        card.innerHTML = `
+            <div>
+                <strong>${peer.username}</strong> (${peer.email})<br>
+                <small style="color: #7f8c8d;">Teaches: ${peer.teach} | Wants to Learn: ${peer.learn}</small>
+            </div>
+            <button style="background-color: #007bff; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;" onclick="launchStudioRoom('${peer.username}')">Launch Studio</button>
+        `;
+        matchContainer.appendChild(card);
+    });
+
+            if(matchingProfiles.length === 0) {
+                matchContainer.innerHTML = '<div style="color:#7f8c8d; font-style:italic;">No structural matching peer parameters located in live backend database record caches yet.</div>';
+                return;
+            }
+
+            matchingProfiles.forEach(peer => {
+                const card = document.createElement('div');
+                card.className = 'match-card';
+                card.innerHTML = `
+                    <div>
+                        <strong>${peer.username}</strong> (${peer.email})<br>
+                        <small>Teaches: ${peer.teach} | Wants to Learn: ${peer.learn}</small>
+                    </div>
+                    <button class="btn btn-primary" style="width:auto;">Launch Studio</button>
+                `;
+                matchContainer.appendChild(card);
+            });
+        }
+        async function launchStudioRoom(partnerName) {
+    document.getElementById('partner-name').innerText = partnerName;
+    navigateTo('page-classroom');
+
+    try {
+        // Request secure media access to the laptop webcam
+        const localCameraStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+        
+        // Link the stream to our new video element
+        const studioVideoElement = document.getElementById('webcam-feed');
+        if (studioVideoElement) {
+            studioVideoElement.srcObject = localCameraStream;
+        }
+    } catch (cameraError) {
+        console.error("Camera access error:", cameraError);
+        alert("Could not activate camera. Please ensure webcam permissions are enabled.");
+    }
+}
+
+    </script>
+</body>
+</html>
